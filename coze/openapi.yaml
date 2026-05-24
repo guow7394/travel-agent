@@ -1,0 +1,190 @@
+openapi: 3.0.3
+info:
+  title: Travel Agent Map Tool
+  version: 0.1.0
+  description: One-day city travel planner for Coze with AMap integration and mock fallback.
+servers:
+  - url: https://travel-agent-five-swart.vercel.app
+paths:
+  /health:
+    get:
+      operationId: health
+      summary: Health check
+      responses:
+        "200":
+          description: Service status
+  /plan-city-day:
+    post:
+      operationId: planCityDay
+      summary: Plan a one-day city route
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlanCityDayRequest"
+      responses:
+        "200":
+          description: Planned route with action card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanCityDayResponse"
+  /plan-b:
+    post:
+      operationId: planB
+      summary: Replan the remaining trip after a change or emergency
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlanBRequest"
+      responses:
+        "200":
+          description: Revised plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanCityDayResponse"
+  /trip-review:
+    post:
+      operationId: tripReview
+      summary: Review a completed trip and suggest memory updates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TripReviewRequest"
+      responses:
+        "200":
+          description: Profile update and next-trip optimizations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TripReviewResponse"
+components:
+  schemas:
+    TravelerPreference:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        likes:
+          type: array
+          items: {type: string}
+        constraints:
+          type: array
+          items: {type: string}
+    PlanCityDayRequest:
+      type: object
+      required:
+        - city
+        - date
+        - start_time
+        - end_time
+        - budget_total_cny
+        - people_count
+        - mode
+        - start_place
+        - end_place
+        - candidate_places
+      properties:
+        city: {type: string, example: 上海}
+        date: {type: string, example: "2026-05-23"}
+        start_time: {type: string, example: "09:30"}
+        end_time: {type: string, example: "20:00"}
+        budget_total_cny: {type: integer, example: 500}
+        people_count: {type: integer, example: 2}
+        mode:
+          type: string
+          enum: [balanced, low_budget, low_energy, special_forces]
+        start_place: {type: string, example: 人民广场}
+        end_place: {type: string, example: 人民广场}
+        candidate_places:
+          type: array
+          items: {type: string}
+        traveler_preferences:
+          type: array
+          items:
+            $ref: "#/components/schemas/TravelerPreference"
+        public_base_url:
+          type: string
+          nullable: true
+    PlanBRequest:
+      type: object
+      required: [original_request, current_plan, event]
+      properties:
+        original_request:
+          $ref: "#/components/schemas/PlanCityDayRequest"
+        current_plan:
+          type: object
+          additionalProperties: true
+        event:
+          type: string
+        completed_places:
+          type: array
+          items: {type: string}
+    TripReviewRequest:
+      type: object
+      required: [trip_summary, actual_spend_cny, budget_total_cny]
+      properties:
+        previous_profile:
+          type: object
+          additionalProperties: true
+        trip_summary: {type: string}
+        liked_places:
+          type: array
+          items: {type: string}
+        pain_points:
+          type: array
+          items: {type: string}
+        actual_spend_cny: {type: integer}
+        budget_total_cny: {type: integer}
+    PlanCityDayResponse:
+      type: object
+      properties:
+        route:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        legs:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        food_recommendations:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        budget_ledger:
+          type: object
+          additionalProperties: true
+        feasibility:
+          type: object
+          additionalProperties: true
+        conflict_resolution: {type: string}
+        static_map_url: {type: string}
+        mocked: {type: boolean}
+        action_card_markdown: {type: string}
+        mode: {type: string}
+        plan_b_reason:
+          type: string
+          nullable: true
+    TripReviewResponse:
+      type: object
+      properties:
+        updated_profile:
+          type: object
+          additionalProperties: true
+        next_trip_optimizations:
+          type: array
+          items: {type: string}
+        budget_learning: {type: string}
+        memory_write_suggestion:
+          type: object
+          additionalProperties: true
