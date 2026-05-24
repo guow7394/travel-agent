@@ -33,8 +33,10 @@ log "Installing dependencies..."
 
 log "Verifying uvicorn..."
 "${PYTHON_BIN}" - <<'PY'
+import travel_agent_service
 import uvicorn
 print(f"[setup] uvicorn OK: {uvicorn.__version__}")
+print(f"[setup] package OK: {travel_agent_service.__name__}")
 PY
 
 log "Done"

@@ -31,10 +31,12 @@ find_python() {
 }
 
 PYTHON_BIN="$(find_python)"
+export PYTHONPATH="${ROOT_DIR}/src${PYTHONPATH:+:${PYTHONPATH}}"
 
 echo "[run] Starting service..."
 echo "[run] Root: ${ROOT_DIR}"
 echo "[run] Python: ${PYTHON_BIN}"
+echo "[run] PYTHONPATH: ${PYTHONPATH}"
 echo "[run] Port: ${PORT}"
 
 cd "${ROOT_DIR}"
